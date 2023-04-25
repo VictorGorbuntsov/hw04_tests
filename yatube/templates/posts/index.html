@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block title %}
+  {{ 'Это главная страница этого замечательного сайта!' }}
+{% endblock %}
+{% block content %}
+  <div class="container py-5">
+    <p>Это главная страница этого замечательного сайта!</p>
+    {% for post in page_obj %}
+      {% include 'posts/includes/post_cart.html' %}
+      {% if not forloop.last %}<hr>{% endif %}
+    {% endfor %}
+    {% include 'posts/includes/paginator.html' %}
+  </div>  
+{% endblock %}
