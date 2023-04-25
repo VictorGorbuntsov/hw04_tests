@@ -32,7 +32,8 @@ class PostFormTest(TestCase):
         self.assertEqual(
             response.status_code, 200)
         self.assertRedirects(
-            response, reverse('posts:profile', kwargs={'username': 'HasNoName'}))
+            response, reverse('posts:profile',
+                              kwargs={'username': 'HasNoName'}))
         self.assertEqual(
             Post.objects.count(), posts_count + 1)
 

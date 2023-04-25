@@ -101,7 +101,6 @@ class PostModelTest(TestCase):
         form_fields = {'text': forms.fields.CharField,
                        'group': forms.fields.ChoiceField}
 
-
         for value, expected in form_fields.items():
             with self.subTest(value=value):
                 form_field = response.context.get('form').fields.get(value)
@@ -122,7 +121,6 @@ class PostModelTest(TestCase):
 
         self.assertEqual(form_field_text, self.post.text)
         self.assertEqual(form_field_group, self.post.group.pk)
-
 
         for value, expected in form_fields.items():
             with self.subTest(value=value):
