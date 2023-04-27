@@ -41,10 +41,22 @@ class PostModelTest(TestCase):
         равны полученным по reverse(name)'''
         reverse_for_url = (
             ('posts:index', None, '/'),
-            ('posts:group_list', (self.group.slug,), f'/group/{self.group.slug}/'),
-            ('posts:profile', (self.user.username,), f'/profile/{self.user.username}/'),
-            ('posts:post_detail', (self.post.id,), f'/posts/{self.post.id}/'),
-            ('posts:post_edit', (self.post.id,), f'/posts/{self.post.id}/edit/'),
+            ('posts:group_list',
+             (self.group.slug,),
+             f'/group/{self.group.slug}/'
+             ),
+            ('posts:profile',
+             (self.user.username,),
+             f'/profile/{self.user.username}/'
+             ),
+            ('posts:post_detail',
+             (self.post.id,),
+             f'/posts/{self.post.id}/'
+             ),
+            ('posts:post_edit',
+             (self.post.id,),
+             f'/posts/{self.post.id}/edit/'
+             ),
             ('posts:create', None, '/create/'),
         )
         for name, args, url in reverse_for_url:

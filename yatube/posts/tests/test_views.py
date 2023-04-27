@@ -1,4 +1,3 @@
-from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
 from django import forms
@@ -163,7 +162,8 @@ class PaginatorViewTest(TestCase):
                 with self.subTest(adress=page):
                     response = self.client.get(page)
                     self.assertEqual(
-                        len(response.context['page_obj']), settings.POSTS_ON_PAGE)
+                        len(response.context['page_obj']),
+                        settings.POSTS_ON_PAGE)
                     response = self.client.get(page + '?page=2')
                     self.assertEqual(
                         len(response.context['page_obj']),
