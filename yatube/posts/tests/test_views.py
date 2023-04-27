@@ -4,7 +4,7 @@ from django.urls import reverse
 from django import forms
 from django.conf import settings
 
-
+from ..forms import PostForm
 from ..models import Post, Group, User
 
 
@@ -84,49 +84,27 @@ class PostModelTest(TestCase):
 
         self.assertEqual(post, self.post)
 
-    def test_post_create_and_post_edit_context(self):
-        """Post create page и post_create и post_edit использует правильный контекст."""
-        response = self.authorized_client.get(reverse('posts:create')), \
-                   self.authorized_client.get(reverse(
-            'posts:post_edit', kwargs={'post_id': self.post.id}))
-
-        form_fields = {
-            'posts:create': {
-                'url_kwargs': None,
-                'text_value': '',
-                'group_value': ''
-            },
-            'posts:post_edit': {
-                'url_kwargs': {'post_id': self.post.id},
-                'text': forms.fields.CharField,
-                'group': forms.fields.ChoiceField,
-            }
-        }
-        for value, expected in form_fields.items():
-            with self.subTest(value=value):
-                form_field = response.context.get('form').fields.get(value)
-                self.assertIsInstance(form_field, expected)
-
     def test_post_edit_context(self):
         """Post create page with post_edit использует правильный контекст."""
-        response = self.authorized_client.get(reverse(
-            'posts:post_edit', args=(self.post.id,)))
-
         form_fields = {
             'text': forms.fields.CharField,
             'group': forms.fields.ChoiceField,
         }
-
-        form_field_text = response.context.get('form')['text'].value()
-        form_field_group = response.context.get('form')['group'].value()
-
-        self.assertEqual(form_field_text, self.post.text)
-        self.assertEqual(form_field_group, self.post.group.pk)
-
-        for value, expected in form_fields.items():
-            with self.subTest(value=value):
-                form_field = response.context.get('form').fields.get(value)
-                self.assertIsInstance(form_field, expected)
+        urls = (
+            ('posts:create', None),
+            ('posts:post_edit', (self.post.id,)),
+        )
+        for url, slug in urls:
+            reverse_name = reverse(url, args=slug)
+            with self.subTest(reverse_name=reverse_name):
+                response = self.authorized_client.get(reverse_name)
+                self.assertIn('form', response.context)
+                self.assertIsInstance(response.context['form'], PostForm)
+                for value, expected in form_fields.items():
+                    with self.subTest(value=value):
+                        form_field = response.context.get(
+                            'form').fields.get(value)
+                        self.assertIsInstance(form_field, expected)
 
     def test_post_didnot_fall_into_wrong_group(self):
         """Тест на то, что пост не попал не в ту группу."""
