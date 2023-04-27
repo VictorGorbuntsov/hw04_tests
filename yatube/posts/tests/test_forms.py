@@ -10,20 +10,27 @@ class PostFormTest(TestCase):
         super().setUpClass()
 
         cls.user = User.objects.create(username='HasNoName')
-        cls.authorized_client = Client()
-        cls.authorized_client.force_login(cls.user)
 
+        cls.create_post = Post.objects.create(
+            text='Some Text',
+            author=cls.user,
+            group=cls.group
+        )
         cls.group = Group.objects.create(
             title='тест группа',
             slug='test_slug',
             description='Описание группы'
         )
 
+    def setUp(self):
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
+
     def test_create_post_by_user(self):
         """Работа формы зарегистрирванного пользователя."""
 
         posts_count = Post.objects.count()
-        post_text_form = {'text': 'Какой-то текст'}
+        post_text_form = {'text': 'Какой-то текст', 'group': self.group.pk}
         response = self.authorized_client.post(
             reverse('posts:create'), data=post_text_form, follow=True)
 
@@ -33,7 +40,7 @@ class PostFormTest(TestCase):
             response.status_code, 200)
         self.assertRedirects(
             response, reverse('posts:profile',
-                              kwargs={'username': 'HasNoName'}))
+                              args=(self.user.username,)))
         self.assertEqual(
             Post.objects.count(), posts_count + 1)
 
@@ -55,18 +62,13 @@ class PostFormTest(TestCase):
     def test_post_edit_author(self):
         """Изменение поста зарегистрированным пользователем."""
 
-        create_post = Post.objects.create(
-            text='Some Text',
-            author=self.user,
-            group=self.group
-        )
-        post_text_form = {'text': 'Измененный текст', 'group': self.group.pk}
+        post_text_form = {'text': 'Измененный текст', 'group': self.second_group.pk}
 
         response = self.authorized_client.post(
             reverse('posts:post_edit',
-                    kwargs={'post_id': create_post.id}), data=post_text_form)
+                    args=(self.create_post.id,)), data=post_text_form)
 
-        edit_post = Post.objects.select_related('group', 'author').get()
+        edit_post = Post.objects.first('group', 'author').get()
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(edit_post.author, self.user)

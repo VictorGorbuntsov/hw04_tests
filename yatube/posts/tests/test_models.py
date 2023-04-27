@@ -1,9 +1,7 @@
-from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.conf import settings
 
-from ..models import Group, Post
-
-User = get_user_model()
+from ..models import Group, Post, User
 
 
 class PostModelTest(TestCase):
@@ -25,5 +23,5 @@ class PostModelTest(TestCase):
         """Проверяем, что у моделей корректно работает __str__."""
         post = PostModelTest.post
         group = PostModelTest.group
-        self.assertEqual(post.text[:15], post.__str__())
+        self.assertEqual(post.text[:settings.THIRTY], post.__str__())
         self.assertEqual(group.title, group.__str__())

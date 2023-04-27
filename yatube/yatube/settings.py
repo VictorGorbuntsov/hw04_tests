@@ -97,6 +97,9 @@ POSTS_ON_PAGE = 10
 
 NUMBER_ONE = 1
 
+ZERO = 0
+
+THIRTY = 30
 
 STATIC_URL = '/static/'
 

@@ -1,5 +1,6 @@
 from django.test import TestCase, Client
-
+from django.urls import reverse
+from django.conf import settings
 
 from ..models import Group, Post, User
 
@@ -61,16 +62,16 @@ class PostModelTest(TestCase):
 
     def test_urls_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
-        templates_url_names = {
-            '/': 'posts/index.html',
-            f'/group/{self.group.slug}/': 'posts/group_list.html',
-            f'/profile/{self.post.author}/': 'posts/profile.html',
-            f'/posts/{self.post.id}/': 'posts/post_detail.html',
-            f'/posts/{self.post.id}/edit/': 'posts/create_post.html',
-            '/create/': 'posts/create_post.html',
-        }
+        templates_url_names = (
+            ('/', 'posts/index.html'),
+            ('/group/', ('self.group.slug/',), 'posts/group_list.html'),
+            ('/profile/', ('self.post.author/',), 'posts/profile.html'),
+            ('/posts/', ('self.post.id/',), 'posts/post_detail.html'),
+            ('/posts/', ('self.post.id/edit/',), 'posts/create_post.html'),
+            ('/create/', 'posts/create_post.html'),
+        )
 
-        for address, templates in templates_url_names.items():
+        for address, templates in templates_url_names:
             with self.subTest(address=address):
                 response = self.authorized_client.get(address)
                 self.assertTemplateUsed(response, templates)
