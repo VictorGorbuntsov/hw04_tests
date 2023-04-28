@@ -35,7 +35,7 @@ class PostModelTest(TestCase):
         self.author = Client()
         self.author.force_login(self.user)
         self.authorized_client = Client()
-        self.authorized_client.force_login(self.user1)
+        self.authorized_client.force_login(self.user)
 
 
     def test_for_matching_reverse_with_hardcore(self):
@@ -94,7 +94,7 @@ class PostModelTest(TestCase):
                     self.assertEqual(response.status_code, HTTPStatus.OK)
         response = self.authorized_client.get(f'/posts/'
                                         f'{self.post.id}/edit/')
-        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_urls_author(self):
         """Доступность URL адреса автору поста"""
@@ -104,15 +104,27 @@ class PostModelTest(TestCase):
                 self.assertEqual(response.status_code, HTTPStatus.OK)
         response = self.authorized_client.get(
             f'/posts/{self.post.id}/edit/')
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_pages_use_correct_template(self):
-        """Использование URLадресом соответствующего шаблона"""
+        """Использование URL-адресом соответствующего шаблона"""
         cache.clear()
         for template, name in self.url_templates.items():
             with self.subTest(name=name):
                 response = self.authorized_client.get(name)
                 self.assertTemplateUsed(response, template)
-        response = self.authorized_client.get(
-            f'/posts/{self.post.id}/edit/')
-        self.assertTemplateUsed(response, 'posts/create_post.html')
+
+    def test_404_url_locations(self):
+        """Не доступная страница"""
+        response = self.client.get('/404/')
+        self.assertEqual(response.status_code, 404)
+
+    def test_urls_not_author(self):
+        """Доступность URL адреса не автору поста"""
+        for template, name in self.url_templates.items():
+            with self.subTest(name=name):
+                response = self.not_author_user.get(name)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
+        response = self.not_author_user.get(f'/posts/'
+                                            f'{self.post.id}/edit/')
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
