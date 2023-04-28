@@ -91,19 +91,23 @@ class PostFormTest(TestCase):
 
     def test_post_edit_guest(self):
         """Изменение поста не зарегистрированным пользователем."""
-        Post.objects.all().delete()
-        posts_count = Post.objects.count()
-        self.assertEqual(posts_count, 0)
+        group_g = Group.objects.create(
+            title='группа групп',
+            slug='slug-slug',
+            description='описание группы' ,
+        )
         form_data = {
-            'text': 'Измененный текст',
-            'group': self.group.pk
+            'text': 'Уникальный проверочный текст',
+            'group': group_g
         }
         response = self.client.post(
-            reverse('posts:create'),
-            data=form_data,
-            follow=True
-        )
+            reverse('posts:post_edit',
+                    kwargs={'post_id': self.create_post.id}),
+            data=form_data)
+
         self.assertFalse(Post.objects.filter(text='Измененный текст',
                                              group=self.group).exists())
-        self.assertNotEqual(response.status_code, 302)
-        self.assertEqual(Post.objects.count(), posts_count)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(form_data.text, form_data['text'])
+        self.assertEqual(form_data.group.pk, form_data['group'])
+
