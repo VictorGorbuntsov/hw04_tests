@@ -33,9 +33,9 @@ class PostModelTest(TestCase):
 
     def setUp(self):
         self.author = Client()
-        self.author.force_login(self.user)
+        self.author.force_login(self.user1)
         self.authorized_client = Client()
-        self.authorized_client.force_login(self.user)
+        self.authorized_client.force_login(self.user1)
 
 
     def test_for_matching_reverse_with_hardcore(self):
@@ -94,7 +94,7 @@ class PostModelTest(TestCase):
                     self.assertEqual(response.status_code, HTTPStatus.OK)
         response = self.authorized_client.get(f'/posts/'
                                         f'{self.post.id}/edit/')
-        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
 
     def test_urls_author(self):
         """Доступность URL адреса автору поста"""
@@ -104,7 +104,7 @@ class PostModelTest(TestCase):
                 self.assertEqual(response.status_code, HTTPStatus.OK)
         response = self.authorized_client.get(
             f'/posts/{self.post.id}/edit/')
-        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(response.status_code, 302)
 
     def test_pages_use_correct_template(self):
         """Использование URL-адресом соответствующего шаблона"""
