@@ -32,7 +32,7 @@ class PostModelTest(TestCase):
         }
 
     def setUp(self):
-        self.author = Client()
+        self.not_author = Client()
         self.author.force_login(self.user1)
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
