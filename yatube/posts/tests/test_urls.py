@@ -35,7 +35,7 @@ class PostModelTest(TestCase):
         self.author = Client()
         self.author.force_login(self.user1)
         self.authorized_client = Client()
-        self.authorized_client.force_login(self.user1)
+        self.authorized_client.force_login(self.user)
 
 
     def test_for_matching_reverse_with_hardcore(self):
@@ -113,6 +113,9 @@ class PostModelTest(TestCase):
             with self.subTest(name=name):
                 response = self.authorized_client.get(name)
                 self.assertTemplateUsed(response, template)
+        response = self.authorized_client.get(
+                    f'/posts/{self.post.id}/edit/')
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_404_url_locations(self):
         """Не доступная страница"""
