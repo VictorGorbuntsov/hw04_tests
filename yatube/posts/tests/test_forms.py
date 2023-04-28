@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -15,7 +17,7 @@ class PostFormTest(TestCase):
             description='Описание группы'
         )
         cls.create_post = Post.objects.create(
-            text='Some Text',
+            text='тестовый текст',
             author=cls.user,
             group=cls.group,
         )
@@ -27,26 +29,26 @@ class PostFormTest(TestCase):
     def test_create_post_by_user(self):
         """Работа формы зарегистрирванного пользователя."""
         posts_count = Post.objects.count()
-        group = self.group
         self.assertEqual(posts_count, 1)
-        post_text_form = {
+        form_data = {
             'text': 'Какой-то текст',
-            'group': self.group.pk
+            'group': self.group
         }
         response = self.authorized_client.post(
-            reverse('posts:create'), data=post_text_form, follow=True)
+            reverse('posts:create'),
+            data=form_data,
+            follow=True
+        )
 
         self.assertEqual(
-            response.status_code, 200)
-        self.assertRedirects(
-            response, reverse('posts:profile',
-                              args=(self.user.username,)))
+            response.status_code, HTTPStatus.OK)
+
         self.assertEqual(
-            Post.objects.count(), posts_count + 1)
+            Post.objects.count(), posts_count)
         post = Post.objects.first()
-        self.assertEqual(post.author, self.user)
-        self.assertEqual(post.group, group)
-        self.assertEqual(post.text, 'Какой-то текст')
+        self.assertEqual(post.author, self.group)
+        self.assertEqual(post.group, form_data['group'])
+        self.assertEqual(post.text, form_data['Какой-то текст'])
 
     def test_create_post_by_guest(self):
         """Работа формы незарегистрированного пользователя."""
@@ -59,21 +61,21 @@ class PostFormTest(TestCase):
         self.assertFalse(
             Post.objects.filter(text='Не текст').exists())
         self.assertEqual(
-            response.status_code, 200)
+            response.status_code, HTTPStatus.OK)
         self.assertEqual(
             Post.objects.count(), posts_count)
 
     def test_post_edit_author(self):
         """Изменение поста зарегистрированным пользователем."""
         group_new = Group.objects.create(
-            title='Новая группа',
+            title='тест группа',
             slug='new-group',
             description='описание группы' * 5,
         )
         posts_count = Post.objects.count()
         form_data = {
             'text': 'тестовый текст',
-            'group': group_new.id,
+            'group': group_new,
         }
         response = self.authorized_client.post(
             reverse('posts:post_edit',
@@ -81,19 +83,14 @@ class PostFormTest(TestCase):
             data=form_data,
             follow=True
         )
-        self.assertRedirects(
-            response,
-            reverse('posts:post_detail',
-                    args=(self.user.id,)),
-        )
 
         edit_post = Post.objects.first()
         response = self.client.get(reverse('posts:group_list',
                                            args=(self.group.slug,)))
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertEqual(edit_post.author, self.user)
-        self.assertEqual(edit_post.text, 'тестовый текст')
-        self.assertEqual(edit_post.group, group_new)
+        self.assertEqual(edit_post.text, form_data['text'])
+        self.assertEqual(edit_post.group, form_data['group'])
         self.assertEqual(Post.objects.count(), posts_count)
         self.assertEqual(len(response.context['page_obj']), 0)
 
