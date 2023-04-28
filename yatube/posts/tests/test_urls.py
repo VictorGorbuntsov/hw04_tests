@@ -21,20 +21,20 @@ class PostModelTest(TestCase):
             author=cls.user,
             group=cls.group
         )
+        cls.templates_url_names = {
+            'posts/index.html': '/',
+            'posts/group.html': f'/group/{cls.group.slug}/',
+            'posts/create.html': '/create/',
+            'posts/profile.html': f'/profile/{cls.author.username}/',
+            'posts/post_detail.html': f'/posts/{cls.post.id}/',
+        }
 
     def setUp(self):
         self.author = Client()
         self.author.force_login(self.user)
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user1)
-        self.reverse_names = (
-            ('posts:index', None),
-            ('posts:group_list', (self.group.slug,)),
-            ('posts:profile', (self.user.username,)),
-            ('posts:post_detail', (self.post.id,)),
-            ('posts:post_edit', (self.post.id,)),
-            ('posts:post_create', None),
-        )
+
 
     def test_for_matching_reverse_with_hardcore(self):
         '''тест проверки соответствия, что прямые - хардкод ссылки

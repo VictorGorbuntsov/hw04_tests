@@ -98,16 +98,16 @@ class PostFormTest(TestCase):
         )
         form_data = {
             'text': 'Уникальный проверочный текст',
-            'group': group_g
+            'group': group_g.id
         }
         response = self.client.post(
             reverse('posts:post_edit',
                     kwargs={'post_id': self.create_post.id}),
             data=form_data)
-
-        self.assertFalse(Post.objects.filter(text='Измененный текст',
+        edit_post = Post.objects.first()
+        self.assertFalse(Post.objects.filter(text='Уникальный проверочный текст',
                                              group=self.group).exists())
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(form_data.text, form_data['text'])
-        self.assertEqual(form_data.group.pk, form_data['group'])
+        self.assertNotEqual(edit_post.text, form_data['text'])
+        self.assertNotEqual(edit_post.group.pk, form_data['group'])
 
