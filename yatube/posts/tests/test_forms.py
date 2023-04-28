@@ -78,17 +78,16 @@ class PostFormTest(TestCase):
         }
         response = self.authorized_client.post(
             reverse('posts:post_edit',
-                    args=(self.create_post.id,)),
-            data=form_data,
-            follow=True
-        )
+                    kwargs={'post_id': self.create_post.id}),
+            data=form_data)
 
         edit_post = Post.objects.first()
+
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        print(Post.object.all())
+        print(Post.objects.first())
         self.assertEqual(edit_post.author, self.user)
         self.assertEqual(edit_post.text, form_data['text'])
-        self.assertNotEqual(edit_post.group, form_data['group'])
+        self.assertEqual(edit_post.group, form_data['group'])
         self.assertEqual(Post.objects.count(), posts_count)
 
     def test_post_edit_guest(self):
@@ -106,6 +105,6 @@ class PostFormTest(TestCase):
             follow=True
         )
         self.assertFalse(Post.objects.filter(text='Измененный текст',
-                                            group=self.group).exists())
+                                             group=self.group).exists())
         self.assertNotEqual(response.status_code, 302)
         self.assertEqual(Post.objects.count(), posts_count)
