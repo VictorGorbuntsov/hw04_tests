@@ -31,7 +31,7 @@ class PostFormTest(TestCase):
         posts_count = Post.objects.count()
         self.assertEqual(posts_count, 1)
         form_data = {
-            'text': 'Какой-то текст',
+            'text': 'ИЗМЕНЕННЫЙ ТЕКСТ',
             'group': self.group.id
         }
         response = self.authorized_client.post(
@@ -67,7 +67,7 @@ class PostFormTest(TestCase):
     def test_post_edit_author(self):
         """Изменение поста зарегистрированным пользователем."""
         group_new = Group.objects.create(
-            title='тест группа',
+            title='ИЗМЕНЕННОЕ НАЗВАНИЕ',
             slug='new-group',
             description='описание группы' * 5,
         )
