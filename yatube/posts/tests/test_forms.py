@@ -32,7 +32,7 @@ class PostFormTest(TestCase):
         self.assertEqual(posts_count, 1)
         form_data = {
             'text': 'Какой-то текст',
-            'group': self.group
+            'group': self.group.id
         }
         response = self.authorized_client.post(
             reverse('posts:create'),
@@ -44,7 +44,7 @@ class PostFormTest(TestCase):
             response.status_code, HTTPStatus.OK)
 
         self.assertEqual(
-            Post.objects.count(), posts_count)
+            Post.objects.count(), posts_count + 1)
         post = Post.objects.first()
         self.assertEqual(post.author, self.group)
         self.assertEqual(post.group, form_data['group'])
@@ -108,6 +108,10 @@ class PostFormTest(TestCase):
             data=form_data,
             follow=True
         )
-
+        self.assertTrue(Post.objects.filter(text='Не текст',
+                                            group=self.group).exists())
+        self.assertEqual(response.context['page_obj'][0].author, self.author)
+        self.assertEqual(response.context['page_obj'][0].group, self.group)
+        self.assertEqual(response.context['page_obj'][0].text, 'Не текст')
         self.assertNotEqual(response.status_code, 302)
         self.assertEqual(Post.objects.count(), posts_count)
