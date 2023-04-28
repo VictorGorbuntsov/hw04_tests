@@ -94,3 +94,13 @@ class PostModelTest(TestCase):
         response = self.client.get(f'/posts/'
                                         f'{self.post.id}/edit/')
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
+
+    def test_urls_author(self):
+        """Доступность URL адреса автору поста"""
+        for template, name in self.url_templates.items():
+            with self.subTest(name=name):
+                response = self.authorized_client.get(name)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
+        response = self.authorized_client.get(
+            f'/posts/{self.post.id}/edit/')
+        self.assertEqual(response.status_code, 302)
