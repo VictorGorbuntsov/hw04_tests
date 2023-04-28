@@ -1,5 +1,6 @@
 from django.test import Client, TestCase
 from django.urls import reverse
+from http import HTTPStatus
 
 
 from ..models import Group, Post, User
@@ -21,7 +22,7 @@ class PostModelTest(TestCase):
             author=cls.user,
             group=cls.group
         )
-        cls.templates_url_names = {
+        cls.url_templates = {
             'posts/index.html': '/',
             'posts/profile.html': f'/profile/{cls.user.username}/',
             'posts/group_list.html': f'/group/{cls.group.slug}/',
@@ -78,3 +79,25 @@ class PostModelTest(TestCase):
             with self.subTest(name=name):
                 response = self.author.get(reverse(name, args=args))
                 self.assertTemplateUsed(response, template)
+
+    def test_urls_access_anonim(self):
+        """URL-адрес доступность для анонимного пользователя"""
+        for template, reverse_name in self.templates_url_names.items():
+            with self.subTest(reverse_name=reverse_name):
+                if reverse_name == reverse('post_create'):
+                    response = self.anonim_user.get(reverse_name)
+                    self.assertEqual(response.status_code, HTTPStatus.FOUND)
+                    self.assertRedirects(response, '/auth/login/?next=/create/')
+                elif reverse_name == reverse(
+                        'add_comment', kwargs={'post_id': self.post.id}):
+                    response = self.anonim_user.get(reverse_name)
+                    self.assertEqual(response.status_code, HTTPStatus.FOUND)
+                    self.assertRedirects(response,
+                                         f'/auth/login/?next='
+                                         f'/posts/')
+                else:
+                    response = self.anonim_user.get(reverse_name)
+                    self.assertEqual(response.status_code, HTTPStatus.OK)
+        response = self.anonim_user.get(f'/posts/'
+                                        f'{self.post.id}/edit/')
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
