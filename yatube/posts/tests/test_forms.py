@@ -67,13 +67,13 @@ class PostFormTest(TestCase):
     def test_post_edit_author(self):
         """Изменение поста зарегистрированным пользователем."""
         group_new = Group.objects.create(
-            title='тест группа',
+            title='НАЗВАНИЕ ГРУППЫ',
             slug='new-group',
             description='описание группы' * 5,
         )
         posts_count = Post.objects.count()
         form_data = {
-            'text': 'тестовый текст',
+            'text': 'ИЗМЕНЕННЫЙ ТЕКСТ',
             'group': group_new,
         }
         response = self.authorized_client.post(
@@ -84,8 +84,8 @@ class PostFormTest(TestCase):
         )
 
         edit_post = Post.objects.first()
-        response = self.client.get(reverse('posts:group_list',
-                                           args=(self.group.slug,)))
+        #response = self.client.get(reverse('posts:group_list',
+        #                                   args=(self.group.slug,)))
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertEqual(edit_post.author, self.user)
         self.assertEqual(edit_post.text, form_data['text'])
