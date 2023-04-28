@@ -84,13 +84,13 @@ class PostFormTest(TestCase):
         edit_post = Post.objects.first()
 
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.context['page_obj'][0].author, self.user)
-        self.assertEqual(response.context['page_obj'][0].group, self.group)
-        self.assertEqual(response.context['page_obj'][0].text, 'Вот здесь текст поменяй')
-        #self.assertEqual(Post.objects.count(), posts_count)
+        self.assertEqual(edit_post.author, self.user)
+        self.assertEqual(edit_post.text, form_data['text'])
+        self.assertEqual(edit_post.group.pk, form_data['group'])
+        self.assertEqual(Post.objects.count(), posts_count)
 
     def test_post_edit_guest(self):
-        """Изменение поста  не зарегистрированным пользователем."""
+        """Изменение поста не зарегистрированным пользователем."""
         Post.objects.all().delete()
         posts_count = Post.objects.count()
         self.assertEqual(posts_count, 0)
