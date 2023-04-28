@@ -81,22 +81,22 @@ class PostModelTest(TestCase):
                 self.assertTemplateUsed(response, template)
 
     def test_urls_access_anonim(self):
-        """URL-адрес доступность для анонимного пользователя"""
-        for template, reverse_name in self.templates_url_names.items():
-            with self.subTest(reverse_name=reverse_name):
-                if reverse_name == reverse('post_create'):
-                    response = self.anonim_user.get(reverse_name)
+        """Доступность URL адреса для анонимного пользователя"""
+        for template, name in self.url_templates.items():
+            with self.subTest(reverse_name=name):
+                if name == reverse('post_create'):
+                    response = self.anonim_user.get(name)
                     self.assertEqual(response.status_code, HTTPStatus.FOUND)
                     self.assertRedirects(response, '/auth/login/?next=/create/')
-                elif reverse_name == reverse(
+                elif name == reverse(
                         'add_comment', kwargs={'post_id': self.post.id}):
-                    response = self.anonim_user.get(reverse_name)
+                    response = self.anonim_user.get(name)
                     self.assertEqual(response.status_code, HTTPStatus.FOUND)
                     self.assertRedirects(response,
                                          f'/auth/login/?next='
                                          f'/posts/')
                 else:
-                    response = self.anonim_user.get(reverse_name)
+                    response = self.anonim_user.get(name)
                     self.assertEqual(response.status_code, HTTPStatus.OK)
         response = self.anonim_user.get(f'/posts/'
                                         f'{self.post.id}/edit/')
