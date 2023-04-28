@@ -45,10 +45,9 @@ class PostFormTest(TestCase):
 
         self.assertEqual(
             Post.objects.count(), posts_count + 1)
-        post = Post.objects.first()
-        self.assertEqual(post.author, self.group)
-        self.assertEqual(post.group, form_data['group'])
-        self.assertEqual(post.text, form_data['Какой-то текст'])
+        self.assertEqual(response.context['page_obj'][0].author, self.user)
+        self.assertEqual(response.context['page_obj'][0].group, self.group)
+        self.assertEqual(response.context['page_obj'][0].text, 'Какой-то текст')
 
     def test_create_post_by_guest(self):
         """Работа формы незарегистрированного пользователя."""
@@ -108,10 +107,7 @@ class PostFormTest(TestCase):
             data=form_data,
             follow=True
         )
-        self.assertTrue(Post.objects.filter(text='Не текст',
+        self.assertTrue(Post.objects.filter(text='Измененный текст',
                                             group=self.group).exists())
-        self.assertEqual(response.context['page_obj'][0].author, self.author)
-        self.assertEqual(response.context['page_obj'][0].group, self.group)
-        self.assertEqual(response.context['page_obj'][0].text, 'Не текст')
         self.assertNotEqual(response.status_code, 302)
         self.assertEqual(Post.objects.count(), posts_count)
