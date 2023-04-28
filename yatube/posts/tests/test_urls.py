@@ -1,6 +1,7 @@
 from django.test import Client, TestCase
 from django.urls import reverse
 from http import HTTPStatus
+from django.core.cache import cache
 
 
 from ..models import Group, Post, User
@@ -89,9 +90,9 @@ class PostModelTest(TestCase):
                     self.assertEqual(response.status_code, HTTPStatus.FOUND)
                     self.assertRedirects(response, '/auth/login/?next=/create/')
                 else:
-                    response = self.client.get(name)
+                    response = self.authorized_client.get(name)
                     self.assertEqual(response.status_code, HTTPStatus.OK)
-        response = self.client.get(f'/posts/'
+        response = self.authorized_client.get(f'/posts/'
                                         f'{self.post.id}/edit/')
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
 
@@ -104,3 +105,14 @@ class PostModelTest(TestCase):
         response = self.authorized_client.get(
             f'/posts/{self.post.id}/edit/')
         self.assertEqual(response.status_code, 302)
+
+    def test_pages_use_correct_template(self):
+        """Использование URLадресом соответствующего шаблона"""
+        cache.clear()
+        for template, name in self.url_templates.items():
+            with self.subTest(name=name):
+                response = self.authorized_client.get(name)
+                self.assertTemplateUsed(response, template)
+        response = self.authorized_client.get(
+            f'/posts/{self.post.id}/edit/')
+        self.assertTemplateUsed(response, 'posts/create_post.html')
