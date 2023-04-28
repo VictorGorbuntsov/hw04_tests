@@ -23,10 +23,10 @@ class PostModelTest(TestCase):
         )
         cls.templates_url_names = {
             'posts/index.html': '/',
-            'posts/group.html': f'/group/{cls.group.slug}/',
-            'posts/create.html': '/create/',
-            'posts/profile.html': f'/profile/{cls.author.username}/',
+            'posts/profile.html': f'/profile/{cls.user.username}/',
+            'posts/group_list.html': f'/group/{cls.group.slug}/',
             'posts/post_detail.html': f'/posts/{cls.post.id}/',
+            'posts/create_post.html': '/create/',
         }
 
     def setUp(self):
