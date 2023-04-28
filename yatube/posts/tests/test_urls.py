@@ -1,7 +1,6 @@
 from django.test import Client, TestCase
 from django.urls import reverse
 from http import HTTPStatus
-from django.core.cache import cache
 
 
 from ..models import Group, Post, User
@@ -33,7 +32,7 @@ class PostModelTest(TestCase):
 
     def setUp(self):
         self.not_author = Client()
-        self.author.force_login(self.user1)
+        self.not_author.force_login(self.user1)
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
@@ -78,7 +77,7 @@ class PostModelTest(TestCase):
         )
         for name, args, template in templates_url_names:
             with self.subTest(name=name):
-                response = self.author.get(reverse(name, args=args))
+                response = self.authorized_client.get(reverse(name, args=args))
                 self.assertTemplateUsed(response, template)
 
     def test_urls_access_anonim(self):
@@ -94,7 +93,7 @@ class PostModelTest(TestCase):
                     self.assertEqual(response.status_code, HTTPStatus.OK)
         response = self.authorized_client.get(f'/posts/'
                                         f'{self.post.id}/edit/')
-        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_urls_author(self):
         """Доступность URL адреса автору поста"""
@@ -104,11 +103,10 @@ class PostModelTest(TestCase):
                 self.assertEqual(response.status_code, HTTPStatus.OK)
         response = self.authorized_client.get(
             f'/posts/{self.post.id}/edit/')
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_pages_use_correct_template(self):
         """Использование URL-адресом соответствующего шаблона"""
-        cache.clear()
         for template, name in self.url_templates.items():
             with self.subTest(name=name):
                 response = self.authorized_client.get(name)
@@ -126,8 +124,8 @@ class PostModelTest(TestCase):
         """Доступность URL адреса не автору поста"""
         for template, name in self.url_templates.items():
             with self.subTest(name=name):
-                response = self.not_author_user.get(name)
+                response = self.not_author.get(name)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
-        response = self.not_author_user.get(f'/posts/'
+        response = self.not_author.get(f'/posts/'
                                             f'{self.post.id}/edit/')
         self.assertEqual(response.status_code, HTTPStatus.FOUND)

@@ -6,12 +6,9 @@ from django.conf import settings
 from ..forms import PostForm
 from ..models import Post, Group, User
 
+TWENTY = 20
 
 class PostModelTest(TestCase):
-    def __init__(self, methodName: str = ...):
-        super().__init__(methodName)
-        self.another_group = None
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -27,12 +24,12 @@ class PostModelTest(TestCase):
             group=cls.group
         )
 
-    def check_attrs(self, page_obj):
-        self.assertEqual(page_obj.author, self.post.author)
-        self.assertEqual(page_obj.group, self.post.group)
-        self.assertEqual(page_obj.id, self.post.id)
-        self.assertEqual(page_obj.text, self.post.text)
-        self.assertEqual(page_obj.pub_date, self.post.pub_date)
+    def check_attrs(self, response):
+        self.assertEqual(response.author, self.post.author)
+        self.assertEqual(response.group, self.post.group)
+        self.assertEqual(response.id, self.post.id)
+        self.assertEqual(response.text, self.post.text)
+        self.assertEqual(response.pub_date, self.post.pub_date)
 
     def setUp(self):
         self.authorized_client = Client()
@@ -133,7 +130,7 @@ class PaginatorViewTest(TestCase):
 
         list_of_posts = []
 
-        for page in range(20):
+        for page in range(TWENTY):
             list_of_posts.append(
                 Post(
                     text=f'Test text №{page}',
