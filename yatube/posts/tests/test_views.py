@@ -156,4 +156,3 @@ class PaginatorViewTest(TestCase):
                         self.assertEqual(
                             len(response.context['page_obj']),
                             ban)
-
