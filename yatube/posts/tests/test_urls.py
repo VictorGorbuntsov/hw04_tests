@@ -36,7 +36,6 @@ class PostModelTest(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
 
-
     def test_for_matching_reverse_with_hardcore(self):
         '''тест проверки соответствия, что прямые - хардкод ссылки
         равны полученным по reverse(name)'''
@@ -87,12 +86,13 @@ class PostModelTest(TestCase):
                 if name == reverse('posts:create'):
                     response = self.client.get(name)
                     self.assertEqual(response.status_code, HTTPStatus.FOUND)
-                    self.assertRedirects(response, '/auth/login/?next=/create/')
+                    self.assertRedirects(response,
+                                         '/auth/login/?next=/create/')
                 else:
                     response = self.authorized_client.get(name)
                     self.assertEqual(response.status_code, HTTPStatus.OK)
         response = self.authorized_client.get(f'/posts/'
-                                        f'{self.post.id}/edit/')
+                                              f'{self.post.id}/edit/')
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_urls_author(self):
@@ -111,8 +111,7 @@ class PostModelTest(TestCase):
             with self.subTest(name=name):
                 response = self.authorized_client.get(name)
                 self.assertTemplateUsed(response, template)
-        response = self.authorized_client.get(
-                    f'/posts/{self.post.id}/edit/')
+        response = self.authorized_client.get(f'/posts/{self.post.id}/edit/')
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_404_url_locations(self):
@@ -126,6 +125,5 @@ class PostModelTest(TestCase):
             with self.subTest(name=name):
                 response = self.not_author.get(name)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
-        response = self.not_author.get(f'/posts/'
-                                            f'{self.post.id}/edit/')
+        response = self.not_author.get(f'/posts/'f'{self.post.id}/edit/')
         self.assertEqual(response.status_code, HTTPStatus.FOUND)

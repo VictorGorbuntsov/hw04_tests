@@ -8,9 +8,12 @@ from ..models import Post, Group, User
 
 TWENTY = 20
 
+
 class PostModelTest(TestCase):
+
     @classmethod
     def setUpClass(cls):
+
         super().setUpClass()
         cls.user = User.objects.create_user(username='HasNoName')
         cls.group = Group.objects.create(
@@ -25,10 +28,10 @@ class PostModelTest(TestCase):
         )
 
     def check_attrs(self, response, flag=False):
-        if flag == False:
-            page_obj = response.context['page_obj'][0]
-        else:
+        if flag:
             page_obj = response.context['post']
+        else:
+            page_obj = response.context['page_obj'][0]
         self.assertEqual(page_obj.author, self.post.author)
         self.assertEqual(page_obj.group, self.post.group)
         self.assertEqual(page_obj.id, self.post.id)
