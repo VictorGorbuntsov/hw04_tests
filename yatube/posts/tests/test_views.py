@@ -42,26 +42,17 @@ class PostModelTest(TestCase):
     def test_index_context(self):
         """Шаблон Index сформирован с правильным контекстом."""
         response = self.authorized_client.get(reverse('posts:index'))
-        post = Post.objects.select_related('author').all()[0]
-        page_obj = response.context['page_obj'][0]
-
         self.check_attrs(response)
         self.assertIn('page_obj', response.context)
-        self.assertEqual(page_obj, post)
 
     def test_group_list_context(self):
         """Проверка Group list использует правильные данные в контекст."""
         response = self.authorized_client.get(
             reverse('posts:group_list', args=(self.group.slug,)))
-        post = Post.objects.select_related(
-            'author', 'group').filter(group=self.group)[0]
-
-        page_obj = response.context['page_obj'][0]
 
         self.check_attrs(response)
         self.assertIn('page_obj', response.context)
         self.assertIn('group', response.context)
-        self.assertEqual(page_obj, post)
 
     def test_profile_context(self):
         """Проверка profile использует правильный контекст."""
@@ -71,18 +62,16 @@ class PostModelTest(TestCase):
             'author', 'group').filter(author=self.user)[0]
         page_obj = response.context['page_obj'][0]
 
-        self.assertIn('page_obj', response.context)
-        self.assertIn('author', response.context)
+        self.check_attrs(response)
         self.assertEqual(page_obj, post)
+        self.assertEqual(post.author, self.user)
 
     def test_post_detail_context(self):
         """Проверка Post detail использует правильный контекст."""
         response = self.authorized_client.get(reverse(
             'posts:post_detail', kwargs={'post_id': self.post.id}))
 
-        post = response.context['post']
-
-        self.assertEqual(post, self.post)
+        self.check_attrs(response, flag=True)
 
     def test_post_edit_context(self):
         """Post create page with post_edit использует правильный контекст."""
@@ -108,15 +97,16 @@ class PostModelTest(TestCase):
 
     def test_post_didnot_fall_into_wrong_group(self):
         """Тест на то, что пост не попал не в ту группу."""
-        test_post = Post.objects.create(
-            text='этот пост не должен попасть в не нужную группу',
-            author=self.user,
-            group=self.group
+        group_not_group = Group.objects.create(
+            title='Тестовая негруппа',
+            slug='aaa',
+            description='Тестовое описание',
         )
+
         response = self.client.get(
             reverse('posts:group_list', args=(self.group.slug,)))
         page_obj = response.context['page_obj'][settings.ZERO]
-        self.assertNotEqual(test_post, page_obj)
+        self.assertNotEqual(group_not_group, page_obj.group)
 
 
 class PaginatorViewTest(TestCase):
@@ -150,8 +140,8 @@ class PaginatorViewTest(TestCase):
     def test_paginator_first_page(self):
         """Проверка корректной работы paginator."""
         list_of_check_page = ('/',
-                              '/group/test-slug/',
-                              '/profile/HasNoName/'
+                              f'/group/{self.group.slug}/',
+                              f'/profile/{self.user}/'
                               )
         list_of_paginator_page = (
             (('?page=1', settings.POSTS_ON_PAGE),
@@ -159,10 +149,10 @@ class PaginatorViewTest(TestCase):
              )
 
         for page in list_of_check_page:
-            for pag in list_of_paginator_page:
-                with self.subTest(adress=page):
-                    response = self.client.get(page)
+            for pag, ban in list_of_paginator_page:
+                with self.subTest(adress=pag):
+                    response = self.client.get(page + pag)
                     self.assertEqual(
                         len(response.context['page_obj']),
-                        settings.POSTS_ON_PAGE)
+                        ban)
 
