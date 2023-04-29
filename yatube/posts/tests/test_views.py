@@ -144,15 +144,16 @@ class PaginatorViewTest(TestCase):
                               f'/profile/{self.user}/'
                               )
         list_of_paginator_page = (
-            (('?page=1', settings.POSTS_ON_PAGE),
-             ('?page=2', settings.POSTS_ON_PAGE),)
-             )
+            ('?page=1', settings.POSTS_ON_PAGE),
+            ('?page=2', settings.POSTS_ON_PAGE)
+        )
 
         for page in list_of_check_page:
-            for pag, ban in list_of_paginator_page:
-                with self.subTest(adress=pag):
-                    response = self.client.get(page + pag)
-                    self.assertEqual(
-                        len(response.context['page_obj']),
-                        ban)
+            with self.subTest(page=page):
+                for pag, ban in list_of_paginator_page:
+                    with self.subTest(pag=pag, ban=ban):
+                        response = self.client.get(page + pag)
+                        self.assertEqual(
+                            len(response.context['page_obj']),
+                            ban)
 
