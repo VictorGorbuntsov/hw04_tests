@@ -24,12 +24,16 @@ class PostModelTest(TestCase):
             group=cls.group
         )
 
-    def check_attrs(self, response):
-        self.assertEqual(response.author, self.post.author)
-        self.assertEqual(response.group, self.post.group)
-        self.assertEqual(response.id, self.post.id)
-        self.assertEqual(response.text, self.post.text)
-        self.assertEqual(response.pub_date, self.post.pub_date)
+    def check_attrs(self, response, flag=False):
+        if flag == False:
+            page_obj = response.context['page_obj'][0]
+        else:
+            page_obj = response.context['post']
+        self.assertEqual(page_obj.author, self.post.author)
+        self.assertEqual(page_obj.group, self.post.group)
+        self.assertEqual(page_obj.id, self.post.id)
+        self.assertEqual(page_obj.text, self.post.text)
+        self.assertEqual(page_obj.pub_date, self.post.pub_date)
 
     def setUp(self):
         self.authorized_client = Client()
@@ -41,7 +45,7 @@ class PostModelTest(TestCase):
         post = Post.objects.select_related('author').all()[0]
         page_obj = response.context['page_obj'][0]
 
-        self.check_attrs(page_obj)
+        self.check_attrs(response)
         self.assertIn('page_obj', response.context)
         self.assertEqual(page_obj, post)
 
@@ -54,7 +58,7 @@ class PostModelTest(TestCase):
 
         page_obj = response.context['page_obj'][0]
 
-        self.check_attrs(page_obj)
+        self.check_attrs(response)
         self.assertIn('page_obj', response.context)
         self.assertIn('group', response.context)
         self.assertEqual(page_obj, post)
@@ -107,7 +111,7 @@ class PostModelTest(TestCase):
         test_post = Post.objects.create(
             text='этот пост не должен попасть в не нужную группу',
             author=self.user,
-            group=self.another_group
+            group=self.group
         )
         response = self.client.get(
             reverse('posts:group_list', args=(self.group.slug,)))
@@ -151,8 +155,8 @@ class PaginatorViewTest(TestCase):
                               )
         list_of_paginator_page = (
             (('?page=1', settings.POSTS_ON_PAGE),
-             ('?page=2', settings.POSTS_ON_PAGE),
-             ))
+             ('?page=2', settings.POSTS_ON_PAGE),)
+             )
 
         for page in list_of_check_page:
             for pag in list_of_paginator_page:
@@ -161,7 +165,4 @@ class PaginatorViewTest(TestCase):
                     self.assertEqual(
                         len(response.context['page_obj']),
                         settings.POSTS_ON_PAGE)
-                    response = self.client.get(page + '?page=2')
-                    self.assertEqual(
-                        len(response.context['page_obj']),
-                        settings.POSTS_ON_PAGE)
+

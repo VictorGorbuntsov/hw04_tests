@@ -118,7 +118,7 @@ class PostModelTest(TestCase):
     def test_404_url_locations(self):
         """Не доступная страница"""
         response = self.client.get('/404/')
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
     def test_urls_not_author(self):
         """Доступность URL адреса не автору поста"""
