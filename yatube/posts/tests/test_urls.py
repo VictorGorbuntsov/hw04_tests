@@ -34,7 +34,7 @@ class PostModelTest(TestCase):
             ('posts:profile', (self.user.username,)),
             ('posts:post_detail', (self.post.id,)),
             ('posts:post_edit', (self.post.id,)),
-            ('posts:post_create', None),
+            ('posts:create', None),
         )
 
     def test_for_matching_reverse_with_hardcore(self):
@@ -95,17 +95,6 @@ class PostModelTest(TestCase):
                                          )
                 else:
                     self.assertEqual(response.status_code, HTTPStatus.OK)
-
-        # for template, name in self.url_templates.items():
-        #     with self.subTest(name=name):
-        #         if name == reverse('posts:create'):
-        #             response = self.client.get(name)
-        #             self.assertEqual(response.status_code, HTTPStatus.FOUND)
-        #             self.assertRedirects(response,
-        #                                  '/auth/login/?next=/create/')
-        #         else:
-        #             response = self.authorized_client.get(name)
-        #             self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_urls_author(self):
         """Доступность URL адреса автору поста"""
