@@ -91,8 +91,7 @@ class PostModelTest(TestCase):
                     url_one = reverse('users:login')
                     url_two = reverse(name, args=args)
                     self.assertRedirects(response, (
-                        f'{url_one}?next={url_two}')
-                                         )
+                        f'{url_one}?next={url_two}'))
                 else:
                     self.assertEqual(response.status_code, HTTPStatus.OK)
 

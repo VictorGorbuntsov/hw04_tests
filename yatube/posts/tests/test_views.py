@@ -57,7 +57,6 @@ class PostModelTest(TestCase):
         self.assertEqual(group_test, self.group)
         self.check_attrs(response)
 
-
     def test_profile_context(self):
         """Проверка profile использует правильный контекст."""
         response = self.authorized_client.get(
@@ -108,6 +107,7 @@ class PostModelTest(TestCase):
         page_obj = response.context['page_obj'][settings.ZERO]
         self.assertNotEqual(group_not_group, page_obj.group)
         self.assertEqual(page_obj.group, self.group)
+
 
 class PaginatorViewTest(TestCase):
     @classmethod
