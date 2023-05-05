@@ -61,8 +61,9 @@ class PostModelTest(TestCase):
         """Проверка profile использует правильный контекст."""
         response = self.authorized_client.get(
             reverse('posts:profile', args=(self.user.username,)))
-
-        self.assertEqual(self.post.author, self.user)
+        self.assertIn('author', response.context)
+        author = response.context.get('author')
+        self.assertEqual(author, self.user)
         self.check_attrs(response)
 
     def test_post_detail_context(self):
@@ -140,22 +141,21 @@ class PaginatorViewTest(TestCase):
     def test_paginator_first_page(self):
         """Проверка корректной работы paginator."""
         list_of_check_page = (
-            (reverse('posts:index'),
-             reverse('posts:profile',
-                     args=(self.user.username,)),
-             reverse('posts:group_list',
-                     kwargs={'slug': f'{self.group.slug}'}))
+             ('posts:index', None),
+             ('posts:profile', (self.user.username,)),
+             ('posts:group_list', (self.group.slug,)),
         )
         list_of_paginator_page = (
             ('?page=1', settings.POSTS_ON_PAGE),
             ('?page=2', settings.POSTS_ON_PAGE)
         )
 
-        for page in list_of_check_page:
-            with self.subTest(page=page):
-                for pages, quantity in list_of_paginator_page:
-                    with self.subTest(pages=pages, quantity=quantity):
-                        response = self.client.get(page + pages)
+        for name, args in list_of_check_page:
+            with self.subTest(name=name):
+                for page, quantity in list_of_paginator_page:
+                    with self.subTest(page=page, quantity=quantity):
+                        response = self.client.get(reverse(name, args=args)
+                                                           + page)
                         self.assertEqual(
                             len(response.context['page_obj']),
                             quantity)

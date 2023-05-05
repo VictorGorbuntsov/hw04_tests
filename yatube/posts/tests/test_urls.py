@@ -109,7 +109,7 @@ class PostModelTest(TestCase):
 
     def test_urls_not_author(self):
         """Доступность URL адреса не автору поста"""
-        for args, name in self.reverse_names:
+        for name, args in self.reverse_names:
             with self.subTest(name=name):
                 response = self.not_author.get(reverse(name, args=args),
                                                follow=True)
