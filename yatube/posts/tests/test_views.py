@@ -68,7 +68,7 @@ class PostModelTest(TestCase):
     def test_post_detail_context(self):
         """Проверка Post detail использует правильный контекст."""
         response = self.authorized_client.get(reverse(
-            'posts:post_detail', kwargs={'post_id': self.post.id}))
+            'posts:post_detail', args=(self.post.id,)))
 
         self.check_attrs(response, flag=True)
 
@@ -142,7 +142,7 @@ class PaginatorViewTest(TestCase):
         list_of_check_page = (
             (reverse('posts:index'),
              reverse('posts:profile',
-                     kwargs={'username': f'{self.user.username}'}),
+                     args=(self.user.username,)),
              reverse('posts:group_list',
                      kwargs={'slug': f'{self.group.slug}'}))
         )

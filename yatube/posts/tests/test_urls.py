@@ -97,7 +97,7 @@ class PostModelTest(TestCase):
 
     def test_urls_author(self):
         """Доступность URL адреса автору поста"""
-        for template, name in self.reverse_names:
+        for args, name in self.reverse_names:
             with self.subTest(name=name):
                 response = self.authorized_client.get(name)
                 self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
@@ -109,7 +109,12 @@ class PostModelTest(TestCase):
 
     def test_urls_not_author(self):
         """Доступность URL адреса не автору поста"""
-        for template, name in self.reverse_names:
+        for args, name in self.reverse_names:
             with self.subTest(name=name):
-                response = self.not_author.get(name)
-                self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+                response = self.not_author.get(reverse(name, args=args),
+                                               follow=True)
+                if name == 'posts:post_edit':
+                    self.assertRedirects(response, reverse('posts:post_detail',
+                                                           args=args))
+                else:
+                    self.assertEqual(response.status_code, HTTPStatus.OK)

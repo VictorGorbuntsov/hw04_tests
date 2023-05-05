@@ -47,7 +47,7 @@ class PostFormTest(TestCase):
             Post.objects.count(), posts_count + 1)
         post = Post.objects.first()
         self.assertEqual(post.author, self.user)
-        self.assertEqual(post.group, self.group)
+        self.assertEqual(post.group.id, form_data['group'])
         self.assertEqual(post.text, form_data['text'])
 
     def test_create_post_by_guest(self):
