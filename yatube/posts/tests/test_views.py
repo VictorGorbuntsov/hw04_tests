@@ -141,9 +141,9 @@ class PaginatorViewTest(TestCase):
     def test_paginator_first_page(self):
         """Проверка корректной работы paginator."""
         list_of_check_page = (
-             ('posts:index', None),
-             ('posts:profile', (self.user.username,)),
-             ('posts:group_list', (self.group.slug,)),
+            ('posts:index', None),
+            ('posts:profile', (self.user.username,)),
+            ('posts:group_list', (self.group.slug,)),
         )
         list_of_paginator_page = (
             ('?page=1', settings.POSTS_ON_PAGE),
@@ -155,7 +155,7 @@ class PaginatorViewTest(TestCase):
                 for page, quantity in list_of_paginator_page:
                     with self.subTest(page=page, quantity=quantity):
                         response = self.client.get(reverse(name, args=args)
-                                                           + page)
+                                                   + page)
                         self.assertEqual(
                             len(response.context['page_obj']),
                             quantity)
