@@ -97,10 +97,11 @@ class PostModelTest(TestCase):
 
     def test_urls_author(self):
         """Доступность URL адреса автору поста"""
-        for args, name in self.reverse_names:
+        for name, args in self.reverse_names:
             with self.subTest(name=name):
-                response = self.authorized_client.get(name)
-                self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+                response = self.authorized_client.get(reverse(name, args=args),
+                                                      follow=True)
+                self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_404_url_locations(self):
         """Не доступная страница"""
